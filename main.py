@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import matplotlib.dates as mdates
+from sklearn import linear_model
 
 data = pd.read_csv(r'C:\Users\hp\AppData\Local\Temp\7zO864F92FD\owid-covid-data.csv')
 
@@ -22,9 +23,11 @@ print(data.date)
 pd.set_option('display.max_rows', 500)
 print(data['location'].value_counts())
 
-data.del(columns=['female_smokers'], axis=1)
+data.drop(['female_smokers','cardiovasc_death_rate', 'cardiovasc_death_rate' ,'stringency_index','diabetes_prevalence','handwashing_facilities','male_smokers','aged_65_older' ,'aged_70_older'], axis='columns', inplace=True)
 
-print(data.columns.values)
+print(data.shape)
+
+
 
 
 
