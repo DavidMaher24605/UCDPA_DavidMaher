@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as scs
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
+from matplotlib import dates as mpl_dates
 from matplotlib.dates import DateFormatter
 import matplotlib.dates as mdates
 from sklearn import linear_model
@@ -23,12 +24,53 @@ print(data.date)
 pd.set_option('display.max_rows', 500)
 print(data['location'].value_counts())
 
-data.drop(['female_smokers','cardiovasc_death_rate', 'cardiovasc_death_rate' ,'stringency_index','diabetes_prevalence','handwashing_facilities','male_smokers','aged_65_older' ,'aged_70_older'], axis='columns', inplace=True)
-
 print(data.shape)
 
+data.drop(['female_smokers','cardiovasc_death_rate', 'cardiovasc_death_rate' ,'stringency_index','diabetes_prevalence','handwashing_facilities','male_smokers','aged_65_older' ,'aged_70_older','excess_mortality_cumulative_absolute', 'excess_mortality_cumulative',
+ 'excess_mortality' ,'excess_mortality_cumulative_per_million'], axis='columns', inplace=True)
+
+print(data.shape)
+print(data['date'].min())
+print(data['new_cases'].min())
+
+print(data.loc[45]['date'])
+print(data.loc[1361]['date'])
+print(data.loc[4498]['date'])
+print(data.loc[1]['new_cases'])
+data['new_cases'] = data['new_cases'].fillna(0)
+
+pos_count, neg_count = 0, 0
+
+for num in data['new_cases']:
+
+ # checking condition
+ if num < 0:
+  neg_count += 1
+
+print("Negative numbers in the list: ", neg_count)
+
+#merge date with other data set based on ISO code#
+#Drop data with non nueric values#
+
+#group data for ireland, chart data for Ireland, create function basedon if rate for a country is greater than a given number#
 
 
+data['date'] = pd.to_datetime(data['date'])
+data.sort_values('date', inplace=True)
+Newcase_date = data['date']
+Number_of_NewCases = data['new_cases']
+plt.plot_date(Newcase_date, Number_of_NewCases, linestyle='solid')
+plt.gcf().autofmt_xdate()
+date_format = mpl_dates.DateFormatter('%d-%m-%Y')
+plt.gca().xaxis.set_major_formatter(date_format)
+plt.tight_layout()
+plt.title('New cases per day')
+plt.xlabel('Date')
+plt.ylabel('New Cases')
+plt.savefig('New Cases' + '.png')
+plt.show()
+
+#ned to find out where cases are int#
 
 
 
