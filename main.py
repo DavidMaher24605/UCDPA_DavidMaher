@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import seaborn as scs
+import seaborn as sns
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from matplotlib import dates as mpl_dates
@@ -38,7 +38,7 @@ print(data.loc[1361]['date'])
 print(data.loc[4498]['date'])
 print(data.loc[1]['new_cases'])
 data['new_cases'] = data['new_cases'].fillna(0)
-
+data['location'] = data['location'].replace(0, "unknown")
 pos_count, neg_count = 0, 0
 
 for num in data['new_cases']:
@@ -105,27 +105,26 @@ print('neg_count')
 print()
 
 Europe.new_cases =pd.to_numeric(Europe.new_cases, errors ='coerce').fillna(0).astype(int)
-
+Europe['location'] = Europe['location'].replace("0","unknown")
+#Europe["location"] = pd.to_string(Europe["location"])#
 print(Europe[Europe['new_cases']<0])
 
 Europe_NC = Europe.where(Europe['new_cases'] > 0, 0)
 
-print(Europe_NC)
-Europe_NC['date'] = pd.to_datetime(data['date'])
-Europe_NC.sort_values('date', inplace=True)
-Newcase_date = Europe_NC['date']
-Number_of_NewCases = Europe_NC['new_cases']
-plt.plot_date(Newcase_date, Number_of_NewCases, linestyle='solid')
-plt.gcf().autofmt_xdate()
-date_format = mpl_dates.DateFormatter('%d-%m-%Y')
-plt.gca().xaxis.set_major_formatter(date_format)
-plt.tight_layout()
-plt.title('New cases per day')
-plt.xlabel('Date')
-plt.ylabel('New Cases')
-plt.savefig('New Cases' + '.png')
-plt.show()
+print(Europe_NC['location'].value_counts())
 
+#finding pattern with Regex#
+Regex_search=Europe_NC['location'].str.contains(r'0')
+
+print(Regex_search)
+
+
+
+# repalce issue stopping nice chart not regression, must move on for now#
+
+
+
+#need to fill 0 with blank
 # need to smooth out the data#
 #need to constrain the dates#
 #machine Leanring Linear regeression#
