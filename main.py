@@ -130,6 +130,8 @@ Europe_NC_EU['date'] = Europe_NC['date'].apply(lambda x: pd.Timestamp(x).strftim
 
 #Europe_NC_2021 = Europe_NC.loc[(Europe_NC['date'] > '01-01-2021')]#
 #Europe_NC['date'] = pd.to_datetime(Europe_NC['date']).dt.date#
+
+
 print(Europe_NC_EU.location)
 
 print(Europe_NC_EU.date)
@@ -166,16 +168,32 @@ print(Country_Flag_URLs['alpha-3'])
 #renaming column to make joing easier#
 Country_Flag_URLs.rename(columns={'alpha-3': 'iso_code',}, inplace=True)
 print(Country_Flag_URLs['iso_code'])
-#pd.merge(data, Country_Flag_URLs, on="k")#
 
 data_with_flagURls = pd.merge(data, Country_Flag_URLs, on="iso_code")
 
 print(data_with_flagURls['image_url'])
 
-
-
-
 #data merged sucessfully#
+
+Europe_NC_EU_2021 = Europe_NC_EU.loc[(Europe_NC_EU['date'] >= '2021-01-01') & (Europe_NC_EU['date'] < '2021-10-22')]
+print(Europe_NC_EU_2021)
+print(Europe_NC_EU_2021.date)
+print(Europe_NC_EU_2021.date.max())
+Europe_NC_EU_2021['date'] = pd.to_datetime(Europe_NC_EU['date'])
+Europe_NC_EU_2021.sort_values('date', inplace=True)
+Newcase_date = Europe_NC_EU_2021['date']
+Number_of_NewCases = Europe_NC_EU_2021['new_cases']
+plt.plot_date(Newcase_date, Number_of_NewCases, linestyle='solid')
+plt.gcf().autofmt_xdate()
+date_format = mpl_dates.DateFormatter('%d-%m-%Y')
+plt.gca().xaxis.set_major_formatter(date_format)
+plt.tight_layout()
+plt.title('New cases per day')
+plt.xlabel('Date')
+plt.ylabel('New Cases 2021')
+plt.savefig('New Cases EU 2021' + '.png')
+plt.show()
+
 
 # alpha-3 from one data set has the same three letter acronym as the iso_code column for OWID data set#
 
