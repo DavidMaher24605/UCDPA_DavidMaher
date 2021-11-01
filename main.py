@@ -9,10 +9,11 @@ import matplotlib.dates as mdates
 from sklearn import linear_model
 
 data = pd.read_csv(r'C:\Users\hp\AppData\Local\Temp\7zO864F92FD\owid-covid-data.csv')
-
+Country_Flag_URLs = pd.read_csv(r'C:\Users\hp\Downloads\countries_continents_codes_flags_url.csv')
+print(Country_Flag_URLs.columns.values)
 print(data.info)
 print(data.head)
-
+# convert date column into date format
 
 print(data.columns.values)
 # Too many column headders #
@@ -41,14 +42,13 @@ data['new_cases'] = data['new_cases'].fillna(0)
 data['location'] = data['location'].fillna(0)
 data['location'].replace('', np.nan, inplace=True)
 data['location'] = data['location'].astype(str)
-data['date'] = data['date'].astype('datetime64[ns]')
-data['date'] = pd.to_datetime(data['date'], format='%y%m%d')
+data['date'] = data['date'].apply(lambda x: pd.Timestamp(x).strftime('%m-%d-%Y'))
 
 pos_count, neg_count = 0, 0
 
 for num in data['new_cases']:
 
- # checking condition
+ # checking condition #
  if num < 0:
   neg_count += 1
 
@@ -75,11 +75,24 @@ plt.ylabel('New Cases')
 plt.savefig('New Cases' + '.png')
 plt.show()
 
-#need to find out where cases are int#
-grouped = data.groupby(data.continent)
-Europe = grouped.get_group("Europe")
-Europe_group_sort= Europe.sort_values("location").head()
+# need to find out where cases are int #
+Europe = data.loc[data['continent'] == "Europe"]
+Europe_group_sort = Europe.sort_values("location").head()
+print(Europe.shape)
 print(Europe_group_sort['location'])
+
+pos_count, neg_count = 0, 0
+
+for num in Europe['new_cases']:
+
+ # checking condition#
+ if num < 0:
+  neg_count += 1
+
+print("Negative numbers in the list: ", neg_count)
+
+print('neg_count')
+
 
 Europe['date'] = pd.to_datetime(data['date'])
 Europe.sort_values('date', inplace=True)
@@ -96,18 +109,6 @@ plt.ylabel('New Cases')
 plt.savefig('New Cases' + '.png')
 plt.show()
 
-pos_count, neg_count = 0, 0
-
-for num in Europe['new_cases']:
-
- # checking condition#
- if num < 0:
-  neg_count += 1
-
-print("Negative numbers in the list: ", neg_count)
-
-print('neg_count')
-
 Europe.new_cases =pd.to_numeric(Europe.new_cases, errors ='coerce').fillna(0).astype(int)
 Europe['location'] = Europe['location'].replace("0","unknown")
 #Europe["location"] = pd.to_string(Europe["location"])#
@@ -123,34 +124,71 @@ Regex_search =Europe_NC['location'].str.contains(r'0')
 #sns.lineplot(data=Europe_NC, x="date", y="new_cases")#
 
 print(Europe_NC.shape)
-
 Europe_NC_EU= Europe_NC.drop(Europe_NC.index[Europe_NC['location'].isin([' ',0,'Andorra','United Kingdom','vatican','San Marino','Liechtenstein','Monaco','Iceland','Kosovo','Bosnia and Herzegovina','Switzerland','Montenegro','Belarus','Russia','Serbia','Ukraine','North Macedonia','Albania','Norway'])])
-date_formatt= mpl_dates.DateFormatter('%d-%m-%Y')
+Europe_NC_EU['date'] = Europe_NC['date'].apply(lambda x: pd.Timestamp(x).strftime('%d-%m-%Y'))
+
 
 #Europe_NC_2021 = Europe_NC.loc[(Europe_NC['date'] > '01-01-2021')]#
 #Europe_NC['date'] = pd.to_datetime(Europe_NC['date']).dt.date#
 print(Europe_NC_EU.location)
 
+print(Europe_NC_EU.date)
+print(Europe_NC_EU.date.max())
+Europe_NC_EU['date'] = pd.to_datetime(Europe_NC_EU['date'])
+Europe_NC_EU.sort_values('date', inplace=True)
+Newcase_date = Europe_NC_EU['date']
+Number_of_NewCases = Europe_NC_EU['new_cases']
+plt.plot_date(Newcase_date, Number_of_NewCases, linestyle='solid')
+plt.gcf().autofmt_xdate()
+date_format = mpl_dates.DateFormatter('%d-%m-%Y')
+plt.gca().xaxis.set_major_formatter(date_format)
+plt.tight_layout()
+plt.title('New cases per day')
+plt.xlabel('Date')
+plt.ylabel('New Cases 2021')
+plt.savefig('New Cases EU 2021' + '.png')
+plt.show()
 
+Europe_NC_EU_sort_date = Europe_NC_EU.sort_values("date")
 
-
-
+print(data['date'].max())
+print(Europe_NC_EU.date.max())
+print(Europe_NC_EU_sort_date['date'].max())
 
 # repalce issue stopping nice chart not regression, must move on for now#
 
+#joining data frames#
+
+# data frames will be joined on an shared ISO code#
+
+print(data['iso_code'])
+print(Country_Flag_URLs['alpha-3'])
+#renaming column to make joing easier#
+Country_Flag_URLs.rename(columns={'alpha-3': 'iso_code',}, inplace=True)
+print(Country_Flag_URLs['iso_code'])
+#pd.merge(data, Country_Flag_URLs, on="k")#
+
+data_with_flagURls = pd.merge(data, Country_Flag_URLs, on="iso_code")
+
+print(data_with_flagURls['image_url'])
 
 
-#need to fill 0 with blank
+
+
+#data merged sucessfully#
+
+# alpha-3 from one data set has the same three letter acronym as the iso_code column for OWID data set#
+
+
 # need to smooth out the data#
 #need to constrain the dates#
 #machine Leanring Linear regeression#
 
 
-# prepare the lists for the model
-# X = date_format
-# y = data['gravi_deceduti'].tolist()[1:]
+
+# X = date_format#
+# y = data['gnew cases'].tolist()[1:]#
 # # date format is not suitable for modeling, let's transform the date into incrementals number starting from April 1st
-# starting_date = 37  # April 1st is the 37th day of the series
 # day_numbers = []
 # for i in range(1, len(X)):
 #     day_numbers.append([i])
