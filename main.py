@@ -1,24 +1,21 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns
-from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from matplotlib import dates as mpl_dates
 from matplotlib.dates import DateFormatter
 import matplotlib.dates as mdates
-from sklearn import linear_model
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 
 data = pd.read_csv(r'C:\Users\hp\AppData\Local\Temp\7zO864F92FD\owid-covid-data.csv')
 Country_Flag_URLs = pd.read_csv(r'C:\Users\hp\Downloads\countries_continents_codes_flags_url.csv')
 print(Country_Flag_URLs.columns.values)
 print(data.info)
 print(data.head)
-# convert date column into date format
 
 print(data.columns.values)
-# Too many column headders #
-# to do list #
-# Graph data cases over time#
+
 # drop irrelevant data smoking status, 'cardiovasc_death_rate', 'cardiovasc_death_rate' 'stringency_index' #
 
 print(data.date)
@@ -41,6 +38,9 @@ print(data.loc[1]['new_cases'])
 data['new_cases'] = data['new_cases'].fillna(0)
 data['location'] = data['location'].fillna(0)
 data['location'].replace('', np.nan, inplace=True)
+data['new_tests'].replace('', np.nan, inplace=True)
+data.replace([np.inf, -np.inf], np.nan, inplace=True)
+data['new_tests'] = data['new_tests'].fillna(0)
 data['location'] = data['location'].astype(str)
 data['date'] = data['date'].apply(lambda x: pd.Timestamp(x).strftime('%m-%d-%Y'))
 
@@ -175,7 +175,7 @@ print(data_with_flagURls['image_url'])
 
 #data merged sucessfully#
 
-Europe_NC_EU_2021 = Europe_NC_EU.loc[(Europe_NC_EU['date'] >= '2021-01-01') & (Europe_NC_EU['date'] < '2021-10-22')]
+Europe_NC_EU_2021 = Europe_NC_EU.loc[(Europe_NC_EU['date'] >= '2021-01-01') & (Europe_NC_EU['date'] < '2021-10-23')]
 print(Europe_NC_EU_2021)
 print(Europe_NC_EU_2021.date)
 print(Europe_NC_EU_2021.date.max())
@@ -194,6 +194,27 @@ plt.ylabel('New Cases 2021')
 plt.savefig('New Cases EU 2021' + '.png')
 plt.show()
 
+Europe_NC_EU_2021['date'] = pd.to_datetime(Europe_NC_EU['date'])
+Europe_NC_EU_2021.sort_values('date', inplace=True)
+Newcase_date = Europe_NC_EU_2021['date']
+Number_of_NewCases = Europe_NC_EU_2021['new_cases_smoothed']
+plt.plot_date(Newcase_date, Number_of_NewCases, linestyle='solid')
+plt.gcf().autofmt_xdate()
+date_format = mpl_dates.DateFormatter('%d-%m-%Y')
+plt.gca().xaxis.set_major_formatter(date_format)
+plt.tight_layout()
+plt.title('New cases per day')
+plt.xlabel('Date')
+plt.ylabel('New Cases 2021')
+plt.savefig('New Cases EU 2021' + '.png')
+plt.show()
+
+print(Europe_NC_EU_2021.head)
+
+Europe_NC_EU_2021.columns.to_list().index('iso_code')
+Europe_NC_EU_2021['new_tests'] = Europe_NC_EU_2021['new_tests'].fillna(0)
+print(Europe_NC_EU_2021.new_tests.min())
+print(Europe_NC_EU_2021.new_tests.max())
 
 # alpha-3 from one data set has the same three letter acronym as the iso_code column for OWID data set#
 
@@ -202,20 +223,12 @@ plt.show()
 #need to constrain the dates#
 #machine Leanring Linear regeression#
 
+# X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
+# Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
+# linear_regressor = LinearRegression()
+# linear_regressor.fit(X, Y)
+# Y_pred = linear_regressor.predict(X)
+# plt.scatter(X, Y)
+# plt.plot(X, Y_pred, color='red')
+# plt.show()
 
-
-# X = date_format#
-# y = data['gnew cases'].tolist()[1:]#
-# # date format is not suitable for modeling, let's transform the date into incrementals number starting from April 1st
-# day_numbers = []
-# for i in range(1, len(X)):
-#     day_numbers.append([i])
-# X = day_numbers
-# # # let's train our model only with data after the peak
-# X = X[starting_date:]
-# y = y[starting_date:]
-# # Instantiate Linear Regression
-# linear_regr = linear_model.LinearRegression()
-# # Train the model using the training sets
-# linear_regr.fit(X, y)
-# print ("Linear Regression Model Score: %s" % (linear_regr.score(X, y)))#
