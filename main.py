@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import dates as mpl_dates
-from scipy import stats
+from scipy.stats import zscore
 from matplotlib.dates import DateFormatter
 import matplotlib.dates as mdates
 from sklearn.linear_model import LinearRegression
@@ -25,7 +25,7 @@ print(data['location'].value_counts())
 
 print(data.shape)
 
-df[col_list] = df[col_list].apply(zscore)
+
 
 data.drop(['female_smokers','cardiovasc_death_rate','cardiovasc_death_rate','stringency_index','diabetes_prevalence','handwashing_facilities','male_smokers','aged_65_older' ,'aged_70_older','excess_mortality_cumulative_absolute', 'excess_mortality_cumulative',
  'excess_mortality','excess_mortality_cumulative_per_million'], axis='columns', inplace=True)
@@ -236,18 +236,46 @@ ax.set_xlabel('date')
 ax.set_ylabel('new_cases')
 plt.show()
 
+Europe_NC_EU_2021['zscore-new_cases'] = zscore(Europe_NC_EU_2021['new_cases'])
+Europe_NC_EU_2021['zscore-new_tests'] = zscore(Europe_NC_EU_2021['new_tests'])
+Europe_NC_EU_2021['zscore-total_deaths'] = zscore(Europe_NC_EU_2021['total_deaths'])
+Europe_NC_EU_2021['zscore-people_fully_vaccinated'] = zscore(Europe_NC_EU_2021['people_fully_vaccinated'])
+
+threshold = 3
+Europe_NC_EU_2021['outliers_new_cases'] = np.where((Europe_NC_EU_2021['zscore-new_cases'] - threshold > 0), True, np.where(Europe_NC_EU_2021['zscore-new_cases'] + threshold < 0, True, False))
+Europe_NC_EU_2021['outliers_new_tests'] = np.where((Europe_NC_EU_2021['zscore-new_tests'] - threshold > 0), True, np.where(Europe_NC_EU_2021['zscore-new_tests'] + threshold < 0, True, False))
+Europe_NC_EU_2021['outliers_total_deaths'] = np.where((Europe_NC_EU_2021['zscore-total_deaths'] - threshold > 0), True, np.where(Europe_NC_EU_2021['zscore-total_deaths'] + threshold < 0, True, False))
+Europe_NC_EU_2021['outliers_people_fully_vaccinated'] = np.where((Europe_NC_EU_2021['zscore-people_fully_vaccinated'] - threshold > 0), True, np.where(Europe_NC_EU_2021['zscore-people_fully_vaccinated'] + threshold < 0, True, False))
+
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_new_cases'] == True].index,inplace=True)
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_new_tests'] == True].index,inplace=True)
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_total_deaths'] == True].index,inplace=True)
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_people_fully_vaccinated'] == True].index,inplace=True)
+
+# lets run that box plot again#
+fig, ax = plt.subplots(figsize=(16,8))
+ax.scatter(Europe_NC_EU_2021['date'], Europe_NC_EU_2021['new_cases'])
+ax.set_xlabel('date')
+ax.set_ylabel('new_cases')
+plt.show()
+
+sns.boxplot(y='location', x='new_cases', data=Europe_NC_EU_2021)
+plt.show()
+
+# a compaison of the scatter plots shows a more even distribution with less outliers#
 
 
+# deciding on the algorythm https://towardsdatascience.com/choosing-a-scikit-learn-linear-regression-algorithm-dd96b48105f5#
 
 # need to smooth out the data#
 #machine Leanring Linear regeression#
 
-# X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
-# Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
-# linear_regressor = LinearRegression()
-# linear_regressor.fit(X, Y)
-# Y_pred = linear_regressor.predict(X)
-# plt.scatter(X, Y)
-# plt.plot(X, Y_pred, color='red')
-# plt.show()
+X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
+Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
+linear_regressor = LinearRegression()
+linear_regressor.fit(X, Y)
+Y_pred = linear_regressor.predict(X)
+plt.scatter(X, Y)
+plt.plot(X, Y_pred, color='red')
+plt.show()
 
