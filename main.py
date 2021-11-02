@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from matplotlib import dates as mpl_dates
 from scipy.stats import zscore
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
 
 data = pd.read_csv(r'C:\Users\hp\AppData\Local\Temp\7zO864F92FD\owid-covid-data.csv')
 Country_Flag_URLs = pd.read_csv(r'C:\Users\hp\Downloads\countries_continents_codes_flags_url.csv')
@@ -16,22 +15,15 @@ print(data.head)
 print(data.columns.values)
 print(Country_Flag_URLs.columns.values)
 # drop irrelevant data smoking status, 'cardiovasc_death_rate', 'cardiovasc_death_rate' 'stringency_index' #
-
 print(data.date)
 pd.set_option('display.max_rows', 500)
 print(data['location'].value_counts())
-
 print(data.shape)
-
-
-
-data.drop(['female_smokers','cardiovasc_death_rate','cardiovasc_death_rate','stringency_index','diabetes_prevalence','handwashing_facilities','male_smokers','aged_65_older' ,'aged_70_older','excess_mortality_cumulative_absolute', 'excess_mortality_cumulative',
- 'excess_mortality','excess_mortality_cumulative_per_million'], axis='columns', inplace=True)
-
+data.drop(['female_smokers', 'cardiovasc_death_rate', 'cardiovasc_death_rate', 'stringency_index', 'diabetes_prevalence', 'handwashing_facilities', 'male_smokers', 'aged_65_older', 'aged_70_older', 'excess_mortality_cumulative_absolute', 'excess_mortality_cumulative',
+ 'excess_mortality', 'excess_mortality_cumulative_per_million'], axis='columns', inplace=True)
 print(data.shape)
 print(data['date'].min())
 print(data['new_cases'].min())
-
 print(data.loc[45]['date'])
 print(data.loc[1361]['date'])
 print(data.loc[4498]['date'])
@@ -49,17 +41,14 @@ pos_count, neg_count = 0, 0
 
 for num in data['new_cases']:
 
- # checking condition #
+# checking condition #
+
  if num < 0:
   neg_count += 1
 
 print("Negative numbers in the list: ", neg_count)
 
-#merge date with other data set based on ISO code#
-#Drop data with non nueric values#
-
-#group data for ireland, chart data for Ireland, create function basedon if rate for a country is greater than a given number#
-
+# Merge data with other dataset based on ISO code#
 
 data['date'] = pd.to_datetime(data['date'])
 data.sort_values('date', inplace=True)
@@ -88,7 +77,7 @@ for num in Europe['new_cases']:
 
  # checking condition#
  if num < 0:
-  neg_count += 1
+    neg_count += 1
 
 print("Negative numbers in the list: ", neg_count)
 
@@ -112,26 +101,18 @@ plt.show()
 
 Europe.new_cases =pd.to_numeric(Europe.new_cases, errors ='coerce').fillna(0).astype(int)
 Europe['location'] = Europe['location'].replace("0","unknown")
-#Europe["location"] = pd.to_string(Europe["location"])#
 print(Europe[Europe['new_cases']<0])
 
 Europe_NC = Europe.where(Europe['new_cases'] > 0, 0)
 
 print(Europe_NC['location'].value_counts())
 
-#finding pattern with Regex#
-Regex_search =Europe_NC['location'].str.contains(r'0')
-
-#sns.lineplot(data=Europe_NC, x="date", y="new_cases")#
+# Finding pattern with Regex#
+Regex_search = Europe_NC['location'].str.contains(r'0')
 
 print(Europe_NC.shape)
-Europe_NC_EU= Europe_NC.drop(Europe_NC.index[Europe_NC['location'].isin([' ',0,'Andorra','United Kingdom','vatican','San Marino','Liechtenstein','Monaco','Moldova','Iceland','Kosovo','Bosnia and Herzegovina','Switzerland','Montenegro','Belarus','Russia','Serbia','Ukraine','North Macedonia','Albania','Norway'])])
+Europe_NC_EU = Europe_NC.drop(Europe_NC.index[Europe_NC['location'].isin([' ', 0, 'Andorra', 'United Kingdom', 'vatican', 'San Marino', 'Liechtenstein', 'Monaco', 'Moldova', 'Iceland', 'Kosovo', 'Bosnia and Herzegovina', 'Switzerland', 'Montenegro', 'Belarus', 'Russia', 'Serbia', 'Ukraine', 'North Macedonia', 'Albania', 'Norway'])])
 Europe_NC_EU['date'] = Europe_NC['date'].apply(lambda x: pd.Timestamp(x).strftime('%d-%m-%Y'))
-
-
-#Europe_NC_2021 = Europe_NC.loc[(Europe_NC['date'] > '01-01-2021')]#
-#Europe_NC['date'] = pd.to_datetime(Europe_NC['date']).dt.date#
-
 
 print(Europe_NC_EU.location)
 
@@ -164,15 +145,15 @@ print(Europe_NC_EU_sort_date['date'].max())
 
 print(data['iso_code'])
 print(Country_Flag_URLs['alpha-3'])
-#renaming column to make joing easier#
-Country_Flag_URLs.rename(columns={'alpha-3': 'iso_code',}, inplace=True)
+# Renaming column to make joing easier#
+Country_Flag_URLs.rename(columns={'alpha-3': 'iso_code', }, inplace=True)
 print(Country_Flag_URLs['iso_code'])
 
 data_with_flagURls = pd.merge(data, Country_Flag_URLs, on="iso_code")
 pd.options.display.max_colwidth = 100
 print(data_with_flagURls['image_url'])
 
-#data merged sucessfully#
+# Data frames merged successfully#
 
 Europe_NC_EU_2021 = Europe_NC_EU.loc[(Europe_NC_EU['date'] >= '2021-01-01') & (Europe_NC_EU['date'] < '2021-10-23')]
 print(Europe_NC_EU_2021)
@@ -229,7 +210,7 @@ plt.show()
 
 # box plots reveal that there are a significant number of outliers#
 # data needs to be normalised to get further insights e.g. regression#
-fig, ax = plt.subplots(figsize=(16,8))
+fig, ax = plt.subplots(figsize=(16, 8))
 ax.scatter(Europe_NC_EU_2021['date'], Europe_NC_EU_2021['new_cases'])
 ax.set_xlabel('date')
 ax.set_ylabel('new_cases')
@@ -247,13 +228,13 @@ Europe_NC_EU_2021['outliers_new_tests'] = np.where((Europe_NC_EU_2021['zscore-ne
 Europe_NC_EU_2021['outliers_total_deaths'] = np.where((Europe_NC_EU_2021['zscore-total_deaths'] - threshold > 0), True, np.where(Europe_NC_EU_2021['zscore-total_deaths'] + threshold < 0, True, False))
 Europe_NC_EU_2021['outliers_people_fully_vaccinated'] = np.where((Europe_NC_EU_2021['zscore-people_fully_vaccinated'] - threshold > 0), True, np.where(Europe_NC_EU_2021['zscore-people_fully_vaccinated'] + threshold < 0, True, False))
 
-Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_new_cases'] == True].index,inplace=True)
-Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_new_tests'] == True].index,inplace=True)
-Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_total_deaths'] == True].index,inplace=True)
-Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_people_fully_vaccinated'] == True].index,inplace=True)
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_new_cases'] == True].index, inplace=True)
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_new_tests'] == True].index, inplace=True)
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_total_deaths'] == True].index, inplace=True)
+Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_people_fully_vaccinated'] == True].index, inplace=True)
 
 # lets run that box plot again#
-fig, ax = plt.subplots(figsize=(16,8))
+ax = plt.subplots(figsize=(16, 8))
 ax.scatter(Europe_NC_EU_2021['date'], Europe_NC_EU_2021['new_cases'])
 ax.set_xlabel('date')
 ax.set_ylabel('new_cases')
@@ -270,7 +251,7 @@ plt.show()
 # deciding on the algorythm https://towardsdatascience.com/choosing-a-scikit-learn-linear-regression-algorithm-dd96b48105f5#
 
 # need to smooth out the data#
-#machine Leanring Linear regeression#
+# machine Leanring Linear regeression#
 
 # X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
 # Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
@@ -298,9 +279,7 @@ Europe_NC_EU_2021['new_tests'] = pd.to_numeric(Europe_NC_EU_2021['new_tests'], e
 # plt.plot(X, Y_pred, color='red')
 # plt.show()
 
-#To prove that the auhtor can be peformed by the author please see an example below#
-
-Europe_NC_EU_2021_IRL_FR_DE= Europe_NC_EU_2021.drop(Europe_NC_EU_2021.index[Europe_NC_EU_2021['location'].isin(['Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain','Sweden','Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark', 'Estonia', 'Finland','Greece', 'Hungary'])])
+Europe_NC_EU_2021_IRL_FR_DE = Europe_NC_EU_2021.drop(Europe_NC_EU_2021.index[Europe_NC_EU_2021['location'].isin(['Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark', 'Estonia', 'Finland', 'Greece', 'Hungary'])])
 sns.lineplot(x="date", y="new_cases", hue="location", data=Europe_NC_EU_2021_IRL_FR_DE)
 plt.title('New Cases per Day 2021')
 plt.show()
