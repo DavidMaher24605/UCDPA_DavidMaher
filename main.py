@@ -4,8 +4,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import dates as mpl_dates
 from scipy.stats import zscore
-from matplotlib.dates import DateFormatter
-import matplotlib.dates as mdates
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
@@ -127,7 +125,7 @@ Regex_search =Europe_NC['location'].str.contains(r'0')
 #sns.lineplot(data=Europe_NC, x="date", y="new_cases")#
 
 print(Europe_NC.shape)
-Europe_NC_EU= Europe_NC.drop(Europe_NC.index[Europe_NC['location'].isin([' ',0,'Andorra','United Kingdom','vatican','San Marino','Liechtenstein','Monaco','Iceland','Kosovo','Bosnia and Herzegovina','Switzerland','Montenegro','Belarus','Russia','Serbia','Ukraine','North Macedonia','Albania','Norway'])])
+Europe_NC_EU= Europe_NC.drop(Europe_NC.index[Europe_NC['location'].isin([' ',0,'Andorra','United Kingdom','vatican','San Marino','Liechtenstein','Monaco','Moldova','Iceland','Kosovo','Bosnia and Herzegovina','Switzerland','Montenegro','Belarus','Russia','Serbia','Ukraine','North Macedonia','Albania','Norway'])])
 Europe_NC_EU['date'] = Europe_NC['date'].apply(lambda x: pd.Timestamp(x).strftime('%d-%m-%Y'))
 
 
@@ -220,6 +218,7 @@ print(Europe_NC_EU_2021.new_tests.max())
 # alpha-3 from one data set has the same three letter acronym as the iso_code column for OWID data set#
 
 sns.boxplot(y='location', x='new_cases', data=Europe_NC_EU_2021)
+plt.title('Box Plot of New Cases in The EU by Country - Non Standardised')
 plt.show()
 
 sns.boxplot(y='continent', x='new_cases', data=Europe_NC_EU_2021)
@@ -229,11 +228,12 @@ sns.boxplot(y='continent', x='new_tests', data=Europe_NC_EU_2021)
 plt.show()
 
 # box plots reveal that there are a significant number of outliers#
-# data needs to be normalised to get insights e.g. regression#
+# data needs to be normalised to get further insights e.g. regression#
 fig, ax = plt.subplots(figsize=(16,8))
 ax.scatter(Europe_NC_EU_2021['date'], Europe_NC_EU_2021['new_cases'])
 ax.set_xlabel('date')
 ax.set_ylabel('new_cases')
+plt.title('New Cases per Day 2021 - Non Standardised')
 plt.show()
 
 Europe_NC_EU_2021['zscore-new_cases'] = zscore(Europe_NC_EU_2021['new_cases'])
@@ -257,9 +257,11 @@ fig, ax = plt.subplots(figsize=(16,8))
 ax.scatter(Europe_NC_EU_2021['date'], Europe_NC_EU_2021['new_cases'])
 ax.set_xlabel('date')
 ax.set_ylabel('new_cases')
+plt.title('New Cases per Day 2021 - Within 3 Standard Deviations')
 plt.show()
 
 sns.boxplot(y='location', x='new_cases', data=Europe_NC_EU_2021)
+plt.title('Box Plot of New Cases in The EU by Country - Standardised')
 plt.show()
 
 # a compaison of the scatter plots shows a more even distribution with less outliers#
@@ -270,12 +272,36 @@ plt.show()
 # need to smooth out the data#
 #machine Leanring Linear regeression#
 
-X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
-Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
+# X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
+# Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
 linear_regressor = LinearRegression()
-linear_regressor.fit(X, Y)
-Y_pred = linear_regressor.predict(X)
-plt.scatter(X, Y)
-plt.plot(X, Y_pred, color='red')
+# linear_regressor.fit(X, Y)
+# Y_pred = linear_regressor.predict(X)
+# plt.scatter(X, Y)
+# plt.plot(X, Y_pred, color='red')
+# plt.show()
+
+print(Europe_NC_EU_2021.isnull().any())
+Europe_NC_EU_2021 = Europe_NC_EU_2021.fillna(lambda x: x.median())
+print(Europe_NC_EU_2021.isnull().any())
+
+Europe_NC_EU_2021['new_cases'] = pd.to_numeric(Europe_NC_EU_2021['new_cases'], errors='coerce')
+Europe_NC_EU_2021['new_tests'] = pd.to_numeric(Europe_NC_EU_2021['new_tests'], errors='coerce')
+
+
+# X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
+# Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
+# linear_regressor = LinearRegression()
+# linear_regressor.fit(X, Y)
+# Y_pred = linear_regressor.predict(X)
+# plt.scatter(X, Y)
+# plt.plot(X, Y_pred, color='red')
+# plt.show()
+
+#To prove that the auhtor can be peformed by the author please see an example below#
+
+Europe_NC_EU_2021_IRL_FR_DE= Europe_NC_EU_2021.drop(Europe_NC_EU_2021.index[Europe_NC_EU_2021['location'].isin(['Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain','Sweden','Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark', 'Estonia', 'Finland','Greece', 'Hungary'])])
+sns.lineplot(x="date", y="new_cases", hue="location", data=Europe_NC_EU_2021_IRL_FR_DE)
+plt.title('New Cases per Day 2021')
 plt.show()
 
