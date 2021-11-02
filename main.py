@@ -251,7 +251,7 @@ plt.show()
 # deciding on the algorythm https://towardsdatascience.com/choosing-a-scikit-learn-linear-regression-algorithm-dd96b48105f5#
 
 # need to smooth out the data#
-# machine Leanring Linear regeression#
+# machine learning Linear regression#
 
 # X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
 # Y = Europe_NC_EU_2021.iloc[:,5].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
