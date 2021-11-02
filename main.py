@@ -234,7 +234,7 @@ Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_total_death
 Europe_NC_EU_2021.drop(Europe_NC_EU_2021[Europe_NC_EU_2021['outliers_people_fully_vaccinated'] == True].index, inplace=True)
 
 # lets run that box plot again#
-ax = plt.subplots(figsize=(16, 8))
+fig, ax = plt.subplots(figsize=(16, 8))
 ax.scatter(Europe_NC_EU_2021['date'], Europe_NC_EU_2021['new_cases'])
 ax.set_xlabel('date')
 ax.set_ylabel('new_cases')
