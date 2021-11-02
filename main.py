@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import dates as mpl_dates
+from scipy import stats
 from matplotlib.dates import DateFormatter
 import matplotlib.dates as mdates
 from sklearn.linear_model import LinearRegression
@@ -23,6 +24,8 @@ pd.set_option('display.max_rows', 500)
 print(data['location'].value_counts())
 
 print(data.shape)
+
+df[col_list] = df[col_list].apply(zscore)
 
 data.drop(['female_smokers','cardiovasc_death_rate','cardiovasc_death_rate','stringency_index','diabetes_prevalence','handwashing_facilities','male_smokers','aged_65_older' ,'aged_70_older','excess_mortality_cumulative_absolute', 'excess_mortality_cumulative',
  'excess_mortality','excess_mortality_cumulative_per_million'], axis='columns', inplace=True)
@@ -227,6 +230,13 @@ plt.show()
 
 # box plots reveal that there are a significant number of outliers#
 # data needs to be normalised to get insights e.g. regression#
+fig, ax = plt.subplots(figsize=(16,8))
+ax.scatter(Europe_NC_EU_2021['date'], Europe_NC_EU_2021['new_cases'])
+ax.set_xlabel('date')
+ax.set_ylabel('new_cases')
+plt.show()
+
+
 
 
 # need to smooth out the data#
