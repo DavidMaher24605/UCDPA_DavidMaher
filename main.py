@@ -10,12 +10,12 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 data = pd.read_csv(r'C:\Users\hp\AppData\Local\Temp\7zO864F92FD\owid-covid-data.csv')
 Country_Flag_URLs = pd.read_csv(r'C:\Users\hp\Downloads\countries_continents_codes_flags_url.csv')
-print(Country_Flag_URLs.columns.values)
+
 print(data.info)
 print(data.head)
 
 print(data.columns.values)
-
+print(Country_Flag_URLs.columns.values)
 # drop irrelevant data smoking status, 'cardiovasc_death_rate', 'cardiovasc_death_rate' 'stringency_index' #
 
 print(data.date)
@@ -159,8 +159,6 @@ print(Europe_NC_EU_sort_date['date'].max())
 
 # repalce issue stopping nice chart not regression, must move on for now#
 
-#joining data frames#
-
 # data frames will be joined on an shared ISO code#
 
 print(data['iso_code'])
@@ -170,7 +168,7 @@ Country_Flag_URLs.rename(columns={'alpha-3': 'iso_code',}, inplace=True)
 print(Country_Flag_URLs['iso_code'])
 
 data_with_flagURls = pd.merge(data, Country_Flag_URLs, on="iso_code")
-
+pd.options.display.max_colwidth = 100
 print(data_with_flagURls['image_url'])
 
 #data merged sucessfully#
@@ -218,9 +216,20 @@ print(Europe_NC_EU_2021.new_tests.max())
 
 # alpha-3 from one data set has the same three letter acronym as the iso_code column for OWID data set#
 
+sns.boxplot(y='location', x='new_cases', data=Europe_NC_EU_2021)
+plt.show()
+
+sns.boxplot(y='continent', x='new_cases', data=Europe_NC_EU_2021)
+plt.show()
+
+sns.boxplot(y='continent', x='new_tests', data=Europe_NC_EU_2021)
+plt.show()
+
+# box plots reveal that there are a significant number of outliers#
+# data needs to be normalised to get insights e.g. regression#
+
 
 # need to smooth out the data#
-#need to constrain the dates#
 #machine Leanring Linear regeression#
 
 # X = Europe_NC_EU_2021.iloc[:,27].values.reshape(-1, 1)  # values converts it into a numpy array
